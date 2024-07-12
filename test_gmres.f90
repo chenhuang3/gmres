@@ -4,7 +4,7 @@ use gmres_module
 
 implicit none
 
-integer, parameter :: n=10 ! dimension of the problem
+integer, parameter :: n=10 ! dimension of the problem Ax*b
 real(8) :: matrix(n,n), b(n), x(n), invA(n,n)
 real(8) :: metric, tol
 logical :: print_matrix
