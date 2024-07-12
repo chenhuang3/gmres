@@ -38,9 +38,9 @@ endif
 max_it = 5      ! number of restarts
 tol    = 1e-10
 metric = 1.0d0
-m      = 2      ! number of GMRES iterations
-x      = 0.d0   ! initial x
-nout   = 6      ! file number, 6 for stdout
+m      = 10      ! number of GMRES iterations
+x      = 0.d0    ! initial x
+nout   = 6       ! file number, 6 for stdout
 call gmres(n, matvec, x, b, metric, m, max_it, tol, nout)
 print *,'gmres x=',x
 
