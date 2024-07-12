@@ -135,13 +135,16 @@ contains
       end do
 
       if (error <= tol) exit
+
+      ! compute solution x
       y = s(1:m)
       call solve(m, H(1:m,1:m), y(1:m))
       x = x + matmul(V(:,1:m), y(1:m))
+
+      ! compute error
       call matvec(n, x, vec)
       r = b - vec
-      s(i+1) = norm2(r, metric)
-      error = s(i+1) / bnrm2
+      error = norm2(r, metric) / bnrm2
       if (error <= tol) exit
 
     end do
