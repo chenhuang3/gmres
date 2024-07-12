@@ -21,7 +21,7 @@ contains
     !  x       --  real(8) x(n), initial guess, on exit x is the solution
     !  m       --  integer, number of iterations for each GMRES bewteen restarts
     !  max_it  --  integer, number of restarts
-    !  matvec  --  external function computes A*x
+    !  matvec  --  external function computes A*x, defined as matvec(n, x, z), where z=A*x.
     !  metric  --  real(8), for dot product of two vectors, sum(v1*v2)*metric, for simple linear algebra, set metric=1.d0
     !  nout    --  integer, file number for print information
     !
