@@ -1,4 +1,4 @@
-This is a conversion of the MATLAB GMRES from netlib https://www.netlib.org/templates/matlab/gmres.m
+This is a conversion of the MATLAB GMRES for solving A*x=b, from netlib https://www.netlib.org/templates/matlab/gmres.m
 
 Some main modifications are:
 
