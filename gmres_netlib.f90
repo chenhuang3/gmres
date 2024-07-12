@@ -58,7 +58,7 @@ contains
 
     implicit none
 
-    ! external subroutine to compute A*x
+    ! interface of the external subroutine to compute A*x
     interface
       subroutine matvec(n, x, Ax)
         integer :: n
