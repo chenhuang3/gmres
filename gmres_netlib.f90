@@ -92,7 +92,7 @@ contains
     !------------- Restart --------------
     !------------------------------------
     do iter = 1, max_it
-      write(nout,'(a,i4)') 'restart_iteration: ',iter
+      write(nout,'(a,i4)') 'restart iteration: ',iter
       call matvec(n, x, vec)
       r = b - vec
       V(:,1) = r / norm2(r, metric)
