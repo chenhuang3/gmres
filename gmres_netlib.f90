@@ -93,6 +93,7 @@ contains
     !------------------------------------
     do iter = 1, max_it
       write(nout,'(a,i4)') 'restart iteration: ',iter
+      H = 0.d0
       call matvec(n, x, vec)
       r = b - vec
       V(:,1) = r / norm2(r, metric)
