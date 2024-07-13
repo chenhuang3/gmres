@@ -4,7 +4,7 @@ use gmres_module
 
 implicit none
 
-integer, parameter :: n=10 ! dimension of the problem Ax*b
+integer, parameter :: n=10 ! dimension of the problem
 real(8) :: matrix(n,n), b(n), x(n), invA(n,n)
 real(8) :: metric, tol
 logical :: print_matrix
@@ -16,7 +16,6 @@ seed(1) = 123
 call random_seed(put=seed)
 call random_number(matrix)
 call random_number(b)
-
 
 ! print matrix to check
 print_matrix = .true.
@@ -35,20 +34,20 @@ endif
 
 
 ! call GMRES()
-max_it = 5      ! number of restarts
+max_it = 10      ! number of restarts
 tol    = 1e-10
-metric = 1.0d0
-m      = 10      ! number of GMRES iterations
-x      = 0.d0    ! initial x
-nout   = 6       ! file number, 6 for stdout
-call gmres(n, matvec, x, b, metric, m, max_it, tol, nout)
+metric = 0.01
+m      = 20      ! number of GMRES iterations
+x      = 0.d0   ! initial x
+nout   = 6      ! file number, 6 for stdout
+call gmres(n, matvec, x, b, m, max_it, tol, nout)
 print *,'gmres x=',x
 
 
 ! benchmark
 invA = matrix
 call mat_inv_lapack(n,invA)
-print *,'benchmark=',matmul(invA,b)
+print *,'benchmark=',matmul(invA,b)/metric
 
 
 contains
@@ -58,7 +57,7 @@ subroutine matvec(n,x,Ax)
   integer :: n
   real(dp) :: x(n)
   real(dp) :: Ax(n)
-  Ax = matmul(matrix, x)
+  Ax = matmul(matrix, x)*metric
 end subroutine
 
 end program
