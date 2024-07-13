@@ -1,10 +1,8 @@
-!
 ! Converted from m-file: https://www.netlib.org/templates/matlab/gmres.m
 !
 ! Major modifications:
 !
-!  1. A*x is replaced by an external user-defined subroutine (matvec)
-!  2. Norm and dot product of vectors can take a metric
+!  A*x is replaced by an external user-defined subroutine (matvec)
 !
 ! Chen Huang (Department of Scientific Computing, Florida State University)
 !
@@ -14,7 +12,7 @@ module gmres_module
 
 contains
 
-  subroutine gmres(n, matvec, x, b, metric, m, max_it, tol, nout)
+  subroutine gmres(n, matvec, x, b, m, max_it, tol, nout)
     !
     ! INPUTS:
     !  n       --  integer, dimension of x
@@ -22,7 +20,6 @@ contains
     !  m       --  integer, number of iterations for each GMRES bewteen restarts
     !  max_it  --  integer, number of restarts
     !  matvec  --  external function computes A*x, defined as matvec(n, x, z), where z=A*x.
-    !  metric  --  real(8), for dot product of two vectors, sum(v1*v2)*metric, for simple linear algebra, set metric=1.d0
     !  nout    --  integer, file number for print information
     !
     !--------------------------------------------
@@ -67,8 +64,7 @@ contains
     end interface
 
     integer  :: n, m, max_it, iter, nout
-    real(dp) :: tol, metric
-    real(dp) :: x(n), b(n), vec(n), error
+    real(dp) :: tol, x(n), x_new(n), b(n), vec(n), error
     integer  :: i, j, k
     real(dp) :: bnrm2, rnorm, temp
 
@@ -76,14 +72,11 @@ contains
     real(dp) :: r(n), w(n), y(m), s(m+1), cs(m), sn(m), e1(m+1)
     real(dp) :: V(n,m+1), H(m+1,m)
 
-    bnrm2 = norm2(b, metric)
-    if (bnrm2 == 0.0_dp) bnrm2 = 1.0_dp
+    write(nout,'(a,i4)') 'restart number=',max_it
+    write(nout,'(a,i4)') 'gmres iteration number=',m
 
-    call matvec(n, x, vec)
-    r = b - vec
-    rnorm = norm2(r, metric)
-    error = rnorm / bnrm2
-    if (error < tol) return
+    bnrm2 = norm2(b)
+    if (bnrm2 == 0.0_dp) bnrm2 = 1.0_dp
 
     e1    = 0.0_dp
     e1(1) = 1.0_dp
@@ -92,24 +85,29 @@ contains
     !------------- Restart --------------
     !------------------------------------
     do iter = 1, max_it
+
       write(nout,'(a,i4)') 'restart iteration: ',iter
-      H = 0.d0
+      write(nout,'(a)')' iter    error        min(x)        max(x)'
+      H = 0.d0  ! initialize Hessenberg matrix to zero, very imporant
       call matvec(n, x, vec)
       r = b - vec
-      V(:,1) = r / norm2(r, metric)
-      s = norm2(r, metric) * e1
+      rnorm = norm2(r)
+      V(:,1) = r / rnorm  ! q_1
+      s = rnorm * e1
 
       !-------------------------------------------
       !------------ GMRES iterations -------------
       !-------------------------------------------
       do i = 1, m
         call matvec(n, V(:,i), w)
+
+        ! Arnoldi iteration
         do k = 1, i
-          H(k,i) = dot_product(w, V(:,k)) * metric
+          H(k,i) = dot_product(w, V(:,k))
           w = w - H(k,i) * V(:,k)
         end do
-        H(i+1,i) = norm2(w, metric)
-        V(:,i+1) = w / H(i+1,i)
+        H(i+1,i) = norm2(w)
+        V(:,i+1) = w / H(i+1,i)  ! q_{k+1}
 
         do k = 1, i-1
           temp     =  cs(k) * H(k,i) + sn(k) * H(k+1,i)
@@ -124,33 +122,35 @@ contains
         H(i,i) = cs(i) * H(i,i) + sn(i) * H(i+1,i)
         H(i+1,i) = 0.d0
 
+
         error = abs(s(i+1)) / bnrm2
-        write(nout,'(a,i5,a,es11.3)')'gmres_iter:',i,'  error=',error
+        x_new = x
+        call compute_x(n,i,H(1:i,1:i),V(:,1:i),s(1:i),x_new)
+        write(nout,'(i5,es11.3,2es14.4)')i,error,maxval(x_new),minval(x_new)
 
         if (error <= tol) then
-          y(1:i) = s(1:i)
-          call solve(i, H(1:i,1:i), y(1:i))
-          x = x + matmul(V(:,1:i), y(1:i))
+          call compute_x(n,i,H(1:i,1:i),V(:,1:i),s(1:i),x)
           exit
         end if
       end do
 
       if (error <= tol) exit
-
-      ! compute solution x
-      y = s(1:m)
-      call solve(m, H(1:m,1:m), y(1:m))
-      x = x + matmul(V(:,1:m), y(1:m))
-
-      ! compute error
-      call matvec(n, x, vec)
-      r = b - vec
-      error = norm2(r, metric) / bnrm2
-      if (error <= tol) exit
-
+      call compute_x(n,m,H(1:m,1:m),V(:,1:m),s(1:m),x)
     end do
-
   end subroutine gmres
+
+
+  ! compute x
+  subroutine compute_x(n,m,H,V,s,x)
+    implicit none
+    integer  :: n  ! dim of the problem
+    integer  :: m  ! dim of {q1, q2, ... qm}
+    real(dp) :: H(m,m), V(n,m), s(m), x(n), y(m)
+    y = s
+    call solve(m, H, y)
+    x = x + matmul(V, y)
+  endsubroutine
+
 
 
   ! Based on code: http://www.netlib.org/templates/matlab/rotmat.m
@@ -172,11 +172,10 @@ contains
   end subroutine rotmat
 
 
-  real(dp) function norm2(x, metric)
+  real(dp) function norm2(x)
     implicit none
-    real(dp), dimension(:), intent(in) :: x
-    real(dp) :: metric
-    norm2 = sqrt(sum(x * x) * metric)
+    real(dp) :: x(:)
+    norm2 = sqrt(sum(x * x))
   end function norm2
 
 
