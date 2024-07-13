@@ -22,9 +22,9 @@ print_matrix = .true.
 if (print_matrix) then
   print *,'b=',b
   print *,' ------- matrix ------'
-  do i = 1, 10
+  do i = 1, n
     print *,'column ',i
-    do j = 1, 10
+    do j = 1, n
       print *, matrix(j, i)
     end do
     print *, ""
