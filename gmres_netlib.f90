@@ -1,3 +1,4 @@
+!
 ! Converted from m-file: https://www.netlib.org/templates/matlab/gmres.m
 !
 ! Major modifications:
@@ -122,20 +123,18 @@ contains
         H(i,i) = cs(i) * H(i,i) + sn(i) * H(i+1,i)
         H(i+1,i) = 0.d0
 
-
         error = abs(s(i+1)) / bnrm2
         x_new = x
         call compute_x(n,i,H(1:i,1:i),V(:,1:i),s(1:i),x_new)
-        write(nout,'(i5,es11.3,2es14.4)')i,error,maxval(x_new),minval(x_new)
+        write(nout,'(i5,es11.3,2es14.4)') i,error,maxval(x_new),minval(x_new)
 
-        if (error <= tol) then
-          call compute_x(n,i,H(1:i,1:i),V(:,1:i),s(1:i),x)
+        if (i==m .or. error<=tol) then
+          x = x_new
           exit
         end if
       end do
 
       if (error <= tol) exit
-      call compute_x(n,m,H(1:m,1:m),V(:,1:m),s(1:m),x)
     end do
   end subroutine gmres
 
