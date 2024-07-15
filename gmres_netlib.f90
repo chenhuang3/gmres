@@ -9,10 +9,8 @@
 !
 module gmres_module
   implicit none
-  integer, parameter :: dp = kind(1.0d0)
-
+  
 contains
-
   subroutine gmres(n, matvec, x, b, m, max_it, tol, nout)
     !
     ! INPUTS:
@@ -65,22 +63,22 @@ contains
     end interface
 
     integer  :: n, m, max_it, iter, nout
-    real(dp) :: tol, x(n), x_new(n), b(n), vec(n), error
+    real(8) :: tol, x(n), x_new(n), b(n), vec(n), error
     integer  :: i, j, k
-    real(dp) :: bnrm2, rnorm, temp
+    real(8) :: bnrm2, rnorm, temp
 
     ! note that dim of e1 should be m+1, rather than n in the m-file
-    real(dp) :: r(n), w(n), y(m), s(m+1), cs(m), sn(m), e1(m+1)
-    real(dp) :: V(n,m+1), H(m+1,m)
+    real(8) :: r(n), w(n), y(m), s(m+1), cs(m), sn(m), e1(m+1)
+    real(8) :: V(n,m+1), H(m+1,m)
 
     write(nout,'(a,i4)') 'restart number=',max_it
     write(nout,'(a,i4)') 'gmres iteration number=',m
 
     bnrm2 = norm2(b)
-    if (bnrm2 == 0.0_dp) bnrm2 = 1.0_dp
+    if (bnrm2 == 0.d0) bnrm2 = 1.d0
 
-    e1    = 0.0_dp
-    e1(1) = 1.0_dp
+    e1    = 0.d0
+    e1(1) = 1.d0
 
     !------------------------------------
     !------------- Restart --------------
@@ -144,7 +142,7 @@ contains
     implicit none
     integer  :: n  ! dim of the problem
     integer  :: m  ! dim of {q1, q2, ... qm}
-    real(dp) :: H(m,m), V(n,m), s(m), x(n), y(m)
+    real(8) :: H(m,m), V(n,m), s(m), x(n), y(m)
     y = s
     call solve(m, H, y)
     x = x + matmul(V, y)
@@ -155,7 +153,7 @@ contains
   ! Based on code: http://www.netlib.org/templates/matlab/rotmat.m
   subroutine rotmat(a,b,c,s)
     implicit none
-    real(dp) :: a, b, c, s, temp
+    real(8) :: a, b, c, s, temp
     if (b==0.0d0) then
       c = 1.d0
       s = 0.d0
@@ -171,9 +169,9 @@ contains
   end subroutine rotmat
 
 
-  real(dp) function norm2(x)
+  real(8) function norm2(x)
     implicit none
-    real(dp) :: x(:)
+    real(8) :: x(:)
     norm2 = sqrt(sum(x * x))
   end function norm2
 
@@ -182,7 +180,7 @@ contains
   subroutine solve(n, H, y)
     implicit none
     integer  :: n
-    real(dp) :: H(n,n), y(n), H_inv(n,n)
+    real(8) :: H(n,n), y(n), H_inv(n,n)
 
     H_inv = H
     call mat_inv_lapack(n,H_inv)
@@ -195,7 +193,7 @@ contains
     implicit none
     integer  :: n, info
     integer  :: ipiv(n)
-    real(dp) :: A(n,n), work(n)
+    real(8) :: A(n,n), work(n)
 
     call dgetrf(n, n, A, n, ipiv, info)
     if (info /= 0) then
