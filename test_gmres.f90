@@ -55,8 +55,8 @@ contains
 ! user defined function to compute A*x
 subroutine matvec(n,x,Ax)
   integer :: n
-  real(dp) :: x(n)
-  real(dp) :: Ax(n)
+  real(8) :: x(n)
+  real(8) :: Ax(n)
   Ax = matmul(matrix, x)*metric
 end subroutine
 
