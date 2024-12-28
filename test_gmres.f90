@@ -6,7 +6,7 @@ implicit none
 
 integer, parameter :: n=10 ! dimension of the problem
 real(8) :: matrix(n,n), b(n), x(n), invA(n,n)
-real(8) :: metric, tol
+real(8) :: tol
 logical :: print_matrix
 integer :: m, max_it, i, j, nout, seed(1)
 
@@ -36,7 +36,6 @@ endif
 ! call GMRES()
 max_it = 10      ! number of restarts
 tol    = 1e-10
-metric = 0.01
 m      = 20      ! number of GMRES iterations
 x      = 0.d0   ! initial x
 nout   = 6      ! file number, 6 for stdout
@@ -47,7 +46,7 @@ print *,'gmres x=',x
 ! benchmark
 invA = matrix
 call mat_inv_lapack(n,invA)
-print *,'benchmark=',matmul(invA,b)/metric
+print *,'benchmark=', matmul(invA,b)
 
 
 contains
@@ -57,7 +56,7 @@ subroutine matvec(n,x,Ax)
   integer :: n
   real(8) :: x(n)
   real(8) :: Ax(n)
-  Ax = matmul(matrix, x)*metric
+  Ax = matmul(matrix, x)
 end subroutine
 
 end program
